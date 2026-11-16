@@ -1,0 +1,6 @@
+# Bundle layer: DSH loads this file automatically when the profile lists this bundle.
+# Do not copy the insert block into the profile's cordis.patch.yml: that would
+# duplicate the entry id and prevent Settings from saving.
+- insert:
+    - id: subagent-route-args
+      name: 'dsh-subagent-route-args'

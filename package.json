@@ -1,0 +1,49 @@
+{
+  "name": "dsh-subagent-route-args",
+  "version": "0.1.0",
+  "description": "Treat empty-string provider/model/reasoning_effort tool arguments on DeepSeek Harness subagent tools as omitted fields.",
+  "keywords": [
+    "dsh",
+    "deepseek-harness",
+    "cordis",
+    "plugin",
+    "subagent",
+    "tool-call"
+  ],
+  "license": "MIT",
+  "author": "GV-megumi",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GV-megumi/dsh-subagent-route-args.git"
+  },
+  "homepage": "https://github.com/GV-megumi/dsh-subagent-route-args#readme",
+  "bugs": {
+    "url": "https://github.com/GV-megumi/dsh-subagent-route-args/issues"
+  },
+  "type": "module",
+  "main": "./lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "cordis.patch.yml",
+    "README.md",
+    "README.zh-CN.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node --test test/index.test.js",
+    "lint": "node --check lib/index.js"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  }
+}
