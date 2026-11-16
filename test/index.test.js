@@ -78,6 +78,32 @@ test("keeps a real model when only provider is empty, so pairing still fails", a
 	);
 });
 
+test("removes every empty route field on subagent_fork", async () => {
+	const { run } = harness();
+	const exec = {
+		name: "subagent_fork",
+		arguments: { provider: "", model: "", reasoning_effort: "", prompt: "fork the task" }
+	};
+	const seen = await run(exec, async (current) => {
+		assert.deepEqual(current.arguments, { prompt: "fork the task" });
+		upstreamValidate(current.arguments);
+		return current.arguments;
+	});
+	assert.deepEqual(seen, { prompt: "fork the task" });
+	assert.equal(Object.isFrozen(seen), true);
+});
+
+test("keeps a real route on subagent_fork untouched", async () => {
+	const { run } = harness();
+	const original = { provider: "codex", model: "gpt-6-astra", prompt: "fork" };
+	const exec = { name: "subagent_fork", arguments: original };
+	await run(exec, async (current) => {
+		assert.equal(current.arguments, original);
+		upstreamValidate(current.arguments);
+		return "forked";
+	});
+});
+
 test("treats whitespace-only values as empty and keeps real neighbours", async () => {
 	const { run } = harness();
 	const exec = { name: "subagent", arguments: { provider: "   ", model: "   ", reasoning_effort: "\t", prompt: "hi" } };

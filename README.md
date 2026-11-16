@@ -8,7 +8,7 @@
 
 > Fix `Error: child LLM \`provider\` must be non-empty` when a model fills optional model-route tool arguments with `""`.
 
-The `subagent` and `list_subagent_models` tools in DeepSeek Harness declare
+The `subagent`, `subagent_fork` and `list_subagent_models` tools in DeepSeek Harness declare
 `provider`, `model` and `reasoning_effort` as **optional** — omitting them means
 "inherit the default route". Many models still send `"provider": ""` (or a
 whitespace string) to say "no value here", and the strict 0.2.2 validation
@@ -29,13 +29,14 @@ route fields with empty strings, which also wastes a tool call cycle.
 
 ## What this plugin does
 
-It listens on the Cordis `tools/execute` waterfall and, for those two tools only,
+It listens on the Cordis `tools/execute` waterfall and, for those three tools only,
 deletes `provider` / `model` / `reasoning_effort` when the value is an empty or
 whitespace-only string. Real values and every strict check stay as they are:
 
 | Input | After the plugin | Result |
 | --- | --- | --- |
 | `provider:"", model:"", reasoning_effort:""` | all three removed | default route, no error |
+| same three empty fields on `subagent_fork` | all three removed | fork runs on the default route |
 | `provider:"", model:"gpt-6-astra"` | `model:"gpt-6-astra"` | upstream `` `model` requires `provider` `` — strictness kept |
 | `provider:"codex", model:"gpt-6-astra", effort:""` | `effort` removed | real route still passes the allow-list check |
 | any other tool, or non-object arguments | unchanged | unchanged |
@@ -120,7 +121,8 @@ Ask the agent to call `list_subagent_models` with all three fields empty:
 `provider: "", model: "", reasoning_effort: ""`.
 
 Before the plugin this prints a red `must be non-empty` error; after it the tool
-returns its normal route list.
+returns its normal route list. The same empty fields on `subagent` or
+`subagent_fork` now start on the default route instead of failing.
 
 ### Uninstall
 
@@ -137,8 +139,8 @@ Remove the bundle name from `dsh.profile.bundles`, remove the dependency from
   copy and then calls `next()`.
 - The rewrite is skipped when nothing changes, so real arguments keep their
   object identity.
-- Only `subagent` and `list_subagent_models` are touched, and only the three
-  route fields. No configuration, no dependencies, no runtime patches.
+- Only `subagent`, `subagent_fork` and `list_subagent_models` are touched, and only
+  the three route fields. No configuration, no dependencies, no runtime patches.
 
 ## Compatibility
 

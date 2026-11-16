@@ -1,7 +1,7 @@
 {
   "name": "dsh-subagent-route-args",
-  "version": "0.1.0",
-  "description": "Treat empty-string provider/model/reasoning_effort tool arguments on DeepSeek Harness subagent tools as omitted fields.",
+  "version": "0.2.0",
+  "description": "Treat empty-string provider/model/reasoning_effort tool arguments on DeepSeek Harness subagent, subagent_fork and list_subagent_models tools as omitted fields.",
   "keywords": [
     "dsh",
     "deepseek-harness",

@@ -7,9 +7,9 @@
 
 > 修复模型把可选的路由参数填成 `""` 时触发的 `Error: child LLM \`provider\` must be non-empty`。
 
-DeepSeek Harness 的 `subagent` 与 `list_subagent_models` 工具里，`provider`、`model`、
-`reasoning_effort` 都是**可选**参数——不传就表示"沿用默认路由"。但不少模型会回
-`"provider": ""`（或纯空白）来表达"这里没有值"，0.2.2 的严格校验直接判它非法。
+DeepSeek Harness 的 `subagent`、`subagent_fork` 与 `list_subagent_models` 工具里，
+`provider`、`model`、`reasoning_effort` 都是**可选**参数——不传就表示"沿用默认路由"。
+但不少模型会回 `"provider": ""`（或纯空白）来表达"这里没有值"，0.2.2 的严格校验直接判它非法。
 
 ## 问题现象
 
@@ -25,12 +25,13 @@ Error: `model` must be non-empty
 
 ## 这个插件做什么
 
-它挂在 Cordis 的 `tools/execute` 流水线上，只对上面两个工具、只对三个路由字段，
+它挂在 Cordis 的 `tools/execute` 流水线上，只对上面三个工具、只对三个路由字段，
 把空字符串或纯空白视为"未提供"删除掉。真实值以及所有严格校验保持原样：
 
 | 模型传入 | 插件处理后 | 结果 |
 | --- | --- | --- |
 | `provider:"" model:"" reasoning_effort:""` | 三个字段都被删除 | 走默认路由，不再报错 |
+| `subagent_fork` 上同样三个空字段 | 三个字段都被删除 | fork 走默认路由正常启动 |
 | `provider:"" model:"gpt-6-astra"` | 保留 `model:"gpt-6-astra"` | 上游照常报“只给 model 缺 provider” |
 | `provider:"codex" model:"gpt-6-astra" effort:""` | 删除空 effort | 真实路由仍要过白名单校验 |
 | 其他工具、或参数不是对象 | 完全不动 | 不变 |
@@ -110,7 +111,8 @@ bundles 里放在已有条目旁边即可，顺序无所谓。**不要**把 `cor
 让智能体调用 `list_subagent_models`，三个字段都传空串：
 `provider: "", model: "", reasoning_effort: ""`。
 
-装之前会显示红色的 `must be non-empty`，装之后正常返回路由列表。
+装之前会显示红色的 `must be non-empty`，装之后正常返回路由列表。`subagent` 与
+`subagent_fork` 上同样填三个空串时，现在会直接走默认路由启动，而不是失败。
 
 ### 卸载
 
@@ -124,7 +126,7 @@ bundles 里放在已有条目旁边即可，顺序无所谓。**不要**把 `cor
 - DSH 会把参数快照深冻结，但执行记录本身是普通对象，所以插件用一份冻结的归一化副本
   替换 `exec.arguments`，再调用 `next()`。
 - 没有变化时完全不改，因此真实参数保持对象身份。
-- 只影响两个工具、三个字段；没有配置项、没有依赖、不改运行时文件。
+- 只影响三个工具、三个字段；没有配置项、没有依赖、不改运行时文件。
 
 ## 兼容性
 
